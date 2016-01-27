@@ -29,7 +29,7 @@ int testme::figureOutSize(int f_speed)
 
 uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
 uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
-
+uint8_t delLed[] = {0,1,2,3};
 uint8_t fakeSpeed;
 uint8_t mode;
 // Don't forget to connect the ground wire to Arduino ground,
@@ -49,20 +49,27 @@ void setup() {
   clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
 #endif
   
-  strip.begin();
+ strip.begin();
 
   // Update LED contents, to start they are all 'off'
-  strip.show();
+ strip.show();
   
   //mode set
-  mode = 4;
-  fakeSpeed = 21;
+ mode = 4;
+ 
+ fakeSpeed = 21;
+ 
  colorWipe(Color(0,20,255),0);
-strip.setPixelColor( 0 , Color(255,100,0));
-strip.setPixelColor( 1 , Color(255,100,0));
-strip.setPixelColor( 2 , Color(255,100,0));
-strip.setPixelColor( 3 , Color(255,100,0));
-  strip.show();
+ 
+ strip.setPixelColor( 0 , Color(255,100,0));
+ 
+ strip.setPixelColor( 1 , Color(255,100,0));
+ 
+ strip.setPixelColor( 2 , Color(255,100,0));
+ 
+ strip.setPixelColor( 3 , Color(255,100,0));
+ 
+ strip.show();
 }
 
 
@@ -84,7 +91,7 @@ void loop() {
       break;
     }
     case 4: {//4 strip
-    cycle(fakeSpeed);
+    cycle(fakeSpeed, Color(0,20,255), Color(255,100,0));
     default: break;  
   }
   }
@@ -161,16 +168,27 @@ uint32_t Wheel(byte WheelPos)
    return Color(0, WheelPos * 3, 255 - WheelPos * 3);
   }
 }
-void cycle(uint8_t spd){
+void cycle(uint8_t spd, uint32_t color1, uint32_t color2){
  
- uint8_t r = 0; 
- uint32_t orange = Color(255,100,0);
- uint32_t blue = (0,20,255); 
- for( r ; r <= + strip.numPixels(); r++){
- strip.setPixelColor(r - 4, Color(0,20,255));
- strip.setPixelColor( r , Color(255,100,0));
+ uint32_t col1 = color1;
+ 
+ uint32_t col2 = color2; 
+ 
+ for( uint8_t i = 0; i <= + strip.numPixels(); i++){
+ 
+ delLed[0] = delLed[1];
+ delLed[1] = delLed[2];
+ delLed[2] = delLed[3];
+ delLed[3] = delLed[4];
+ delLed[4] = i;
+ 
+ strip.setPixelColor(delLed[0], col1);
+ 
+ strip.setPixelColor(delLed[4] , col2);
+ 
  strip.show();
-delay(spd);
+ 
+ delay(spd);
  }
 }
 

@@ -30,6 +30,7 @@ int testme::figureOutSize(int f_speed)
 uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
 uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
 uint8_t delLed[] = {0,1,2,3};
+bool doColorWipe = true;
 uint8_t fakeSpeed;
 uint8_t mode;
 // Don't forget to connect the ground wire to Arduino ground,
@@ -91,7 +92,7 @@ void loop() {
       break;
     }
     case 4: {//4 strip
-    cycle(fakeSpeed, Color(0,20,255), Color(255,100,0));
+    cycle(fakeSpeed, Color(50,0,100), Color(230,230,15));
     default: break;  
   }
   }
@@ -189,6 +190,22 @@ void cycle(uint8_t spd, uint32_t color1, uint32_t color2){
  strip.show();
  
  delay(spd);
+ }
+ 
+ void cycleWithWipe(uint8_t waitTime, uint32_t color1, uint32_t color2){
+  if(doColorWipe){
+   colorWipe(waitTime, color1);
+   doColorWipe = false;
+  }
+ cycle(waitTime, color1, color2);
+ }
+ 
+ void cycleWithWipe(uint8_t waitTime, uint32_t initColor, uint32_t color1, uint32_t color2){
+ if(doColorWipe){
+   colorWipe(waitTime, initColor);
+   doColorWipe = false;
+  }
+ cycle(waitTime, color1, color2);
  }
 }
 

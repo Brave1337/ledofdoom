@@ -13,7 +13,7 @@
   
   }
   int ribbonSize;
-  int fakeSpeed;
+  int cycleSpeed;
 
   int figureOutSize(int f_speed);  
 };
@@ -31,8 +31,7 @@ uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
 uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
 uint8_t delLed[] = {0,1,2,3};
 bool doColorWipe = true;
-uint8_t fakeSpeed;
-uint8_t mode;
+uint8_t cycleSpeed;
 // Don't forget to connect the ground wire to Arduino ground,
 // and the +5V wire to a +5V supply
 
@@ -51,51 +50,14 @@ void setup() {
 #endif
   
  strip.begin();
-
-  // Update LED contents, to start they are all 'off'
- strip.show();
-  
-  //mode set
- mode = 4;
  
- fakeSpeed = 21;
- 
- colorWipe(Color(0,20,255),0);
- 
- strip.setPixelColor( 0 , Color(255,100,0));
- 
- strip.setPixelColor( 1 , Color(255,100,0));
- 
- strip.setPixelColor( 2 , Color(255,100,0));
- 
- strip.setPixelColor( 3 , Color(255,100,0));
- 
- strip.show();
+ cycleSpeed = 21;
 }
 
 
 void loop() {
-
-  // Some example procedures showing how to display to the pixels
-  switch(mode){
-    case 1:{
-     rainbow(20);
-      break;
-    }  
-    case 2: {
-      rainbowCycle(1);
-      break;
-    }
-    case 3: {
-      colorWipe(Color(0,20,255),0);
-      //colorWipe(Color(255,100,0),10);
-      break;
-    }
-    case 4: {//4 strip
-    cycle(fakeSpeed, Color(50,0,100), Color(230,230,15));
-    default: break;  
-  }
-  }
+  cycleWithWipe(cycleSpeed, Color(0, 20, 255), Color(255, 100, 0));
+  
 }
  void rainbow(uint8_t wait) {
   int i, j;
@@ -194,7 +156,17 @@ void cycle(uint8_t spd, uint32_t color1, uint32_t color2){
  
  void cycleWithWipe(uint8_t waitTime, uint32_t color1, uint32_t color2){
   if(doColorWipe){
-   colorWipe(waitTime, color1);
+   colorWipe(0, color1);
+   
+   strip.setPixelColor( 0 , color2);
+   
+   strip.setPixelColor( 1 , color2);
+   
+   strip.setPixelColor( 2 , color2);
+   
+   strip.setPixelColor( 3 , color2);
+
+   
    doColorWipe = false;
   }
  cycle(waitTime, color1, color2);
@@ -202,7 +174,16 @@ void cycle(uint8_t spd, uint32_t color1, uint32_t color2){
  
  void cycleWithWipe(uint8_t waitTime, uint32_t initColor, uint32_t color1, uint32_t color2){
  if(doColorWipe){
-   colorWipe(waitTime, initColor);
+   colorWipe(0, initColor);
+   
+   strip.setPixelColor( 0 , color2);
+   
+   strip.setPixelColor( 1 , color2);
+   
+   strip.setPixelColor( 2 , color2);
+   
+   strip.setPixelColor( 3 , color2);
+   
    doColorWipe = false;
   }
  cycle(waitTime, color1, color2);

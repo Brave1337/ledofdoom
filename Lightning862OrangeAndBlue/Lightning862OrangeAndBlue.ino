@@ -1,26 +1,27 @@
-#include "Adafruit_WS2801.h"
+ #include "Adafruit_WS2801.h"
 #include "SPI.h" // Comment out this line if using Trinket or Gemma
 #ifdef __AVR_ATtiny85__
  #include <avr/power.h>
 #endif
-
-//fake class
-/*class cycleRibbonSize
+/*
+// fake class
+class cycleRibbonSize
 {
   public:
-  cycleRibbonSize()
+    int fakerSpeed;
+     uint8_t roboSpeed = 5;//temp
+  cycleRibbonSize(speedinput)
   {
-  
-  }
-  int ribbonSize;
-  int fakeSpeed;
+ //robospeed = whatever the speed is returned as
+ unit8_t  = roboSpeed 
 
+  }
   int figureOutSize(int f_speed);  
 };
 
-int testme::figureOutSize(int f_speed)
+int cycleRibbonSize::figureOutSize(int f_speed)
 {
-  return 4;
+  
 }
 */
 
@@ -31,6 +32,7 @@ uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
 uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
 
 uint8_t fakeSpeed;
+
 uint8_t mode;
 // Don't forget to connect the ground wire to Arduino ground,
 // and the +5V wire to a +5V supply
@@ -50,25 +52,27 @@ void setup() {
 #endif
   
   strip.begin();
-
+    pinMode(11,OUTPUT);
   // Update LED contents, to start they are all 'off'
   strip.show();
   
   //mode set
-  mode = 4;
-  fakeSpeed = 21;
+  mode = 5;
+
+  fakeSpeed = 129;
+  
  colorWipe(Color(0,20,255),0);
-strip.setPixelColor( 0 , Color(255,100,0));
-strip.setPixelColor( 1 , Color(255,100,0));
-strip.setPixelColor( 2 , Color(255,100,0));
-strip.setPixelColor( 3 , Color(255,100,0));
+
   strip.show();
 }
 
 
 void loop() {
+uint8_t passSpeed = (180 - fakeSpeed)/2;
+uint8_t pixelLength = fakeSpeed / 10; 
 
   // Some example procedures showing how to display to the pixels
+  
   switch(mode){
     case 1:{
      rainbow(20);
@@ -84,9 +88,17 @@ void loop() {
       break;
     }
     case 4: {//4 strip
-    cycle(fakeSpeed);
+      cycle(passSpeed, pixelLength);
+      break;    
+    }
+    case 5: {
+     meet(55);
+    }
+    case 6:{
+      strip.setPixelColor(strip.numPixels()-1, Color(100,100,101));
+      strip.show();
+    }
     default: break;  
-  }
   }
 }
  void rainbow(uint8_t wait) {
@@ -161,16 +173,46 @@ uint32_t Wheel(byte WheelPos)
    return Color(0, WheelPos * 3, 255 - WheelPos * 3);
   }
 }
-void cycle(uint8_t spd){
+void cycle(uint8_t spd, uint8_t pixLen){
  
  uint8_t r = 0; 
- uint32_t orange = Color(255,100,0);
- uint32_t blue = (0,20,255); 
- for( r ; r <= + strip.numPixels(); r++){
- strip.setPixelColor(r - 4, Color(0,20,255));
- strip.setPixelColor( r , Color(255,100,0));
- strip.show();
-delay(spd);
- }
+  if (pixLen < 18){
+    for( r ; r <= pixLen - 1 + strip.numPixels(); r++){
+    strip.setPixelColor(r - pixLen, Color(0,20,255));
+    strip.setPixelColor( r , Color(255,100,0));//orange
+    strip.show();
+    delay(spd);
+    }
+  } 
+   else {
+      colorWipe(Color(255,100,0),0);
+   }
+    
+}
+void meet(uint8_t spd){
+
+uint8_t pixLen = 4;
+  for (uint8_t r = 0;r < (pixLen/2 + strip.numPixels())/2; r++){
+    if ( r !=  ((pixLen / 2 + strip.numPixels())/2) ){
+      strip.setPixelColor(r, Color(255,100,0));  
+      strip.setPixelColor(strip.numPixels()-1 - r, Color(255,100,0));
+      strip.setPixelColor(r - pixLen , Color(0, 20,255));
+      strip.setPixelColor(strip.numPixels()-1 - r + pixLen, Color(0,20,255));
+      strip.show();
+      delay(spd);
+    }
+    else{
+      delay(spd);
+    }
+  }
+  for (uint8_t r = strip.numPixels()/2 +3;r < pixLen/2 + strip.numPixels(); r++){
+  
+      strip.setPixelColor(r, Color(255,100,0));  
+      strip.setPixelColor(strip.numPixels()-1 - r, Color(255,100,0));
+      strip.setPixelColor(r - pixLen , Color(0, 20,255));
+      strip.setPixelColor(strip.numPixels()-1 - r + pixLen, Color(0,20,255));
+      strip.show();
+      delay(spd);
+    }
 }
 

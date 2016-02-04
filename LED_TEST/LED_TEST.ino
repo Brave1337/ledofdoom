@@ -1,5 +1,4 @@
 #include <Wire.h>
-
 #define    LIDARLite_ADDRESS   0x62          // Default I2C Address of LIDAR-Lite.
 #define    RegisterMeasure     0x00          // Register to write to initiate ranging.
 #define    MeasureValue        0x04          // Value to initiate ranging.
@@ -34,13 +33,13 @@ void setup()
 #endif
   
  // Serial output
-  Serial.begin(4800);
+  Serial.begin(9600);
   Serial.println("<BEGIN LIDAR>");
   
   // LIDAR control
   Wire.begin(); // join i2c bus
-
- strip.begin();
+  
+  strip.begin();
     
   // Update LED contents, to start they are all 'off'
   strip.show();
@@ -245,10 +244,34 @@ void speedStrip(uint32_t lidarInput){
   strip.show();
 }
 
+void keymapModes(int key[], int modes[]){  
+
+  if(Serial.read() > -1){Serial.println(Serial.read()); Serial.wait();}
+  
+  /*if(Serial.read() > -1){
+
+    int ch = Serial.read();
+    
+    for(uint8_t i = 0; i < arrSizeCh; i++){
+      
+      if((int) key[i] == ch){
+        
+        return modes[i];
+      }
+    }
+    
+  }
+  else{return 0;}*/
+}
+
 void loop() {
-uint8_t passSpeed = (180 - fakeSpeed)/2;
-uint8_t pixelLength = fakeSpeed / 10; 
-uint32_t regDis;
+    int keys[] = {'q', 'w', 'e', 'r', 't', 'y', 'u'};
+    int modes[] = {1, 2, 3, 4, 5, 6, 7};
+    keymapModes(keys, modes);
+    
+    uint8_t passSpeed = (180 - fakeSpeed)/2;
+    uint8_t pixelLength = fakeSpeed / 10; 
+    uint32_t regDis;
 
     measuredDis = lidarGetRange();
     

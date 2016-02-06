@@ -30,7 +30,7 @@
 // Include SPI (Serial Peripheral Interface) library. Does not support SPI Slave.
 #include <SPI.h>
 boolean SSlast = LOW;         // SS last flag.
-const byte led = 9;           // Slave LED digital I/O pin.
+const byte led = 12;           // Slave LED digital I/O pin.
 boolean ledState = HIGH;      // LED state flag.
 const byte cmdBtn = 1;        // SPI cmdBtn master command code.
 const byte cmdLEDState = 2;   // 
@@ -48,7 +48,6 @@ void SlaveInit(void) {
 byte SPItransfer(byte value) {
   SPDR = value;
   while(!(SPSR & (1<<SPIF)));
-  delay(10);
   return SPDR;
 }
 // The setup() function runs after reset.
@@ -93,7 +92,9 @@ void loop() {
         Serial.println("rx:" + String(rx) + ".");
         rx = SPItransfer(ledState);
         Serial.println("ledState:" + String(ledState) + " Sent.");
-        Serial.println("rx:" + String(rx) + ".");        
+        Serial.println("rx:" + String(rx) + ".");  
+        ledState = !ledState;
+        digitalWrite(led, ledState);   
       }
       else {
         // Unrecognized command.

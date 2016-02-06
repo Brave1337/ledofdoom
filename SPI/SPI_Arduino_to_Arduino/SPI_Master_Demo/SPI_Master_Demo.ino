@@ -27,7 +27,7 @@
  * No commercial use without prior consent.
  *
  * Based on code by: Nick Cammon 2/2011.
- */
+ */q
 // Include SPI (Serial Peripheral Interface) library.
 #include <SPI.h>
 const byte btn = 9;              // Master button digital I/O pin.

@@ -20,7 +20,7 @@
 
 int testme::figureOutSize(int f_speed)
 {
-  return 4;
+  return 0x420;
 }
 */
 
@@ -50,15 +50,13 @@ void setup() {
 #endif
   
  strip.begin();
- 
  cycleSpeed = 21;
 }
 
-
 void loop() {
   cycleWithWipe(cycleSpeed, Color(0, 20, 255), Color(255, 100, 0));
-  
 }
+
  void rainbow(uint8_t wait) {
   int i, j;
    

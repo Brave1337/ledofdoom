@@ -134,7 +134,7 @@ void loop() {
     else {
       Serial.println("Slave returned:" + String(rx) + ".");
     }
-    // Disable slave.
+    // Disable slave.d
     digitalWrite(SS, HIGH);
   } 
 }

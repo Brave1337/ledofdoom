@@ -68,9 +68,9 @@ void setup() {
 
 
 void loop() {
-uint8_t passSpeed = (180 - fakeSpeed)/2;
-uint8_t pixelLength = fakeSpeed / 10; 
-
+  uint8_t passSpeed = (180 - fakeSpeed)/2;
+  uint8_t pixelLength = fakeSpeed / 10; 
+  
   // Some example procedures showing how to display to the pixels
   
   switch(mode){

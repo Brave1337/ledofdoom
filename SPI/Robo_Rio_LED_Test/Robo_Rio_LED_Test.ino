@@ -23,9 +23,8 @@ void SlaveInit(void) {
   // Initialize SPI pins.
   pinMode(SCK, INPUT);
   pinMode(MOSI, INPUT);
-//  pinMode(MISO, INPUT);
+  pinMode(MISO, INPUT);
   pinMode(SS, INPUT);
- pinMode(MISO, INPUT);
   // Enable SPI as slave.
   SPCR = (1 << SPE);
 }
@@ -53,7 +52,7 @@ void loop() {
     // Yes, first time?
     if (SSlast != LOW) {
       // Yes, take MISO pin.
-     //pinMode(MISO, OUTPUT);
+      pinMode(MISO, OUTPUT);
       Serial.println("***Slave Enabled.");
       // Write -1 slave response code and receive master command code
       byte rx = SPItransfer(255);
@@ -79,7 +78,7 @@ void loop() {
         Serial.println("rx:" + String(rx) + ".");
       }
       // Update SSlast.
-   // SSlast= LOW;
+      SSlast = LOW;
     }
   }
   else {

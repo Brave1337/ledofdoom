@@ -13,10 +13,9 @@
 uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
 uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
 
-
 uint8_t fakeSpeed;
 uint8_t mode;
-
+bool univ = false; //just a interchangeable bool for whatever. don't use for specific things which need a static bool.
 
 int distance = 0;    // Distance measured
 float measuredDis = 0;
@@ -45,7 +44,7 @@ void setup()
   strip.show();
   
   //mode set
-  mode = 7;
+  mode = 8;
 
   fakeSpeed = 129;
   
@@ -155,6 +154,9 @@ uint32_t Color(byte r, byte g, byte b)
   return c;
 }
 
+uint32_t blue = Color(0,10,123);
+uint32_t orange = Color(120,30,0);
+
 //Input a value 0 to 255 to get a color value.
 //The colours are a transition r - g -b - back to r
 uint32_t Wheel(byte WheelPos)
@@ -214,65 +216,36 @@ uint8_t pixLen = 4;
     }
 }
 
-void speedStrip(uint32_t lidarInput){
-  
-  uint16_t lastLight = (lidarInput - lidarInput%100)/50;
-  int i;
-  int j = strip.numPixels();
-  if(lastLight > 0){
-  
-  for(i = 0; i < j; i++){
-    
-    if(i <= lastLight){
-      
-      strip.setPixelColor(i, Color(120,30,0));
-      
-      strip.setPixelColor(j - (i + 1), Color(120,30,0));
-      
-    }else if(i >= j - (lastLight + 1)){}else{
-      
-      strip.setPixelColor(i, Color(0,10,123));
-      
-      }
-    }
+void tiger(uint16_t s, uint32_t color1, uint32_t color2){
+ if(univ){
+ for(int i = 0; i < strip.numPixels(); i++){
+  if((i%2)==0){
+    strip.setPixelColor(i, color1);
   }else{
-      for (i=0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, Color(0,10,123));
+    strip.setPixelColor(i, color2);
   }
+ }}else{
+  for(int i = 0; i < strip.numPixels(); i++){
+  if((i%2)==0){
+    strip.setPixelColor(i, color2);
+  }else{
+    strip.setPixelColor(i, color1);
   }
-  
-  strip.show();
+ }}
+ univ = !univ;
+ strip.show();
+ delay(s);
 }
 
-void keymapModes(int key[], int modes[]){  
-
-  if(Serial.read() > -1){Serial.println(Serial.read()); Serial.wait();}
+fade(uint32_t a, uint32_t b){
   
-  /*if(Serial.read() > -1){
-
-    int ch = Serial.read();
-    
-    for(uint8_t i = 0; i < arrSizeCh; i++){
-      
-      if((int) key[i] == ch){
-        
-        return modes[i];
-      }
-    }
-    
-  }
-  else{return 0;}*/
 }
 
 void loop() {
-    int keys[] = {'q', 'w', 'e', 'r', 't', 'y', 'u'};
-    int modes[] = {1, 2, 3, 4, 5, 6, 7};
-    keymapModes(keys, modes);
-    
     uint8_t passSpeed = (180 - fakeSpeed)/2;
     uint8_t pixelLength = fakeSpeed / 10; 
     uint32_t regDis;
-
+    
     measuredDis = lidarGetRange();
     
     distance = (measuredDis * filterVal) + (measuredDis * (1 - filterVal));
@@ -317,11 +290,14 @@ void loop() {
       strip.setPixelColor(strip.numPixels()-1, Color(100,100,101));
       strip.show();
       break;
-    }
-    case 7:{
-      speedStrip(regDis);
+    }case 7:{
+      tiger(200, blue, orange);
       break;
-      }
+    }case 8:{
+    fade(orange, blue);
+    break;
+    }
     default: break;  
   }
+  Serial.println(blue);
 }

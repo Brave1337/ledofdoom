@@ -1,5 +1,5 @@
- #include "Adafruit_WS2801.h"
-#include "SPI.h" // Comment out this line if using Trinket or Gemma
+#include "Adafruit_WS2801.h"
+#include "SPI.h" 
 #ifdef __AVR_ATtiny85__
  #include <avr/power.h>
 #endif
@@ -52,16 +52,14 @@ void setup() {
 #endif
   
   strip.begin();
-    pinMode(11,OUTPUT);
-  // Update LED contents, to start they are all 'off'
   strip.show();
   
   //mode set
-  mode = 5;
+  mode = 3;
 
   fakeSpeed = 129;
   
- colorWipe(Color(0,20,255),0);
+ colorWipe(Color( 0, 10, 123),0);
 
   strip.show();
 }
@@ -83,8 +81,8 @@ void loop() {
       break;
     }
     case 3: {
-      colorWipe(Color(0,20,255),0);
-      //colorWipe(Color(255,100,0),10);
+      colorWipe(Color( 0, 10, 123),0);
+      colorWipe(Color( 120, 60, 0),10);
       break;
     }
     case 4: {//4 strip
@@ -93,10 +91,6 @@ void loop() {
     }
     case 5: {
      meet(55);
-    }
-    case 6:{
-      strip.setPixelColor(strip.numPixels()-1, Color(100,100,101));
-      strip.show();
     }
     default: break;  
   }
@@ -178,14 +172,14 @@ void cycle(uint8_t spd, uint8_t pixLen){
  uint8_t r = 0; 
   if (pixLen < 18){
     for( r ; r <= pixLen - 1 + strip.numPixels(); r++){
-    strip.setPixelColor(r - pixLen, Color(0,20,255));
-    strip.setPixelColor( r , Color(255,100,0));//orange
+    strip.setPixelColor(r - pixLen, Color( 0, 10, 123));
+    strip.setPixelColor( r , Color( 120, 60, 0));//orange
     strip.show();
     delay(spd);
     }
   } 
    else {
-      colorWipe(Color(255,100,0),0);
+      colorWipe(Color( 120, 60, 0),0);
    }
     
 }
@@ -194,10 +188,10 @@ void meet(uint8_t spd){
 uint8_t pixLen = 4;
   for (uint8_t r = 0;r < (pixLen/2 + strip.numPixels())/2; r++){
     if ( r !=  ((pixLen / 2 + strip.numPixels())/2) ){
-      strip.setPixelColor(r, Color(255,100,0));  
-      strip.setPixelColor(strip.numPixels()-1 - r, Color(255,100,0));
-      strip.setPixelColor(r - pixLen , Color(0, 20,255));
-      strip.setPixelColor(strip.numPixels()-1 - r + pixLen, Color(0,20,255));
+      strip.setPixelColor(r, Color( 120, 60, 0));  
+      strip.setPixelColor(strip.numPixels()-1 - r, Color( 120, 60, 0));
+      strip.setPixelColor(r - pixLen , Color( 0, 10, 123));
+      strip.setPixelColor(strip.numPixels()-1 - r + pixLen, Color( 0, 10, 123));
       strip.show();
       delay(spd);
     }
@@ -207,10 +201,10 @@ uint8_t pixLen = 4;
   }
   for (uint8_t r = strip.numPixels()/2 +3;r < pixLen/2 + strip.numPixels(); r++){
   
-      strip.setPixelColor(r, Color(255,100,0));  
-      strip.setPixelColor(strip.numPixels()-1 - r, Color(255,100,0));
-      strip.setPixelColor(r - pixLen , Color(0, 20,255));
-      strip.setPixelColor(strip.numPixels()-1 - r + pixLen, Color(0,20,255));
+      strip.setPixelColor(r, Color( 120, 60, 0));  
+      strip.setPixelColor(strip.numPixels()-1 - r, Color( 120, 60, 0));
+      strip.setPixelColor(r - pixLen , Color( 0, 10, 123));
+      strip.setPixelColor(strip.numPixels()-1 - r + pixLen, Color( 0, 10, 123));
       strip.show();
       delay(spd);
     }

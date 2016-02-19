@@ -44,57 +44,20 @@ Adafruit_WS2801 strip = Adafruit_WS2801(32, dataPin, clockPin);
 // (pinout is then specific to each board and can't be changed)
 //Adafruit_WS2801 strip = Adafruit_WS2801(25);
 
+//HELPER FUNCTIONS
 
-
-void setup() {
-#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
-  clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
-#endif
-  
-  strip.begin();
-  strip.show();
-  
-  //mode set
-  mode = 3;
-
-  fakeSpeed = 129;
-  
- colorWipe(Color( 0, 10, 123),0);
-
-  strip.show();
+// Create a 24 bit color value from R,G,B
+uint32_t Color(byte r, byte g, byte b)
+{
+  uint32_t c;
+  c = b;
+  c <<= 8;
+  c |= g;
+  c <<= 8;
+  c |= r;
+  return c;
 }
 
-
-void loop() {
-  uint8_t passSpeed = (180 - fakeSpeed)/2;
-  uint8_t pixelLength = fakeSpeed / 10; 
-  
-  // Some example procedures showing how to display to the pixels
-  
-  switch(mode){
-    case 1:{
-     rainbow(20);
-      break;
-    }  
-    case 2: {
-      rainbowCycle(1);
-      break;
-    }
-    case 3: {
-      colorWipe(Color( 0, 10, 123),0);
-      colorWipe(Color( 120, 60, 0),10);
-      break;
-    }
-    case 4: {//4 strip
-      cycle(passSpeed, pixelLength);
-      break;    
-    }
-    case 5: {
-     meet(55);
-    }
-    default: break;  
-  }
-}
  void rainbow(uint8_t wait) {
   int i, j;
    
@@ -137,19 +100,8 @@ void colorWipe(uint32_t c, uint8_t wait) {
   }
 }
 
-/* Helper functions */
 
-// Create a 24 bit color value from R,G,B
-uint32_t Color(byte r, byte g, byte b)
-{
-  uint32_t c;
-  c = b;
-  c <<= 8;
-  c |= g;
-  c <<= 8;
-  c |= r;
-  return c;
-}
+
 
 //Input a value 0 to 255 to get a color value.
 //The colours are a transition r - g -b - back to r
@@ -179,7 +131,7 @@ void cycle(uint8_t spd, uint8_t pixLen){
     }
   } 
    else {
-      colorWipe(Color( 120, 60, 0),0);
+      colorWipe(Color( 130, 60, 0),0);
    }
     
 }
@@ -209,4 +161,115 @@ uint8_t pixLen = 4;
       delay(spd);
     }
 }
+void solid(uint32_t stripColor){
+ byte i;
+  for (i=0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, stripColor);
+      strip.show();
+  }
+}
+void flash(uint32_t colorSet){
+//JESUS CHRIST THIS IS GOING TO SUCK TO WRITE
+ int color1;
+ int color2;
+  //actual led code
+  byte i;
+  for (i=0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, color1);
+      strip.show();
+  }
+  delay(20);
+  for (i=0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, color2);
+      strip.show();
+  }
+  delay(20);
+}
+
+//END HELPER FUNCTIONS
+
+void setup() {
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
+  clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
+#endif
+  
+  strip.begin();
+  strip.show();
+  
+  //mode set
+  mode = 4;
+  fakeSpeed = 129;
+  
+  strip.show();
+  solid(Color(0, 10, 123));
+  delay(3000);
+}
+
+
+void loop() {
+  byte flashColors;//used in mode 2
+  
+  byte pixelLength;
+  byte passSpeed;
+  byte passMode;//determines what to use based on the passed in mode
+ mode = 255;
+  if (mode <= 100){
+    passMode = 1;
+    passSpeed = 4 + ((100 - mode)* 2);
+  }
+  if ((100 < mode) && (mode < 200)){
+    passMode = 2;
+    flashColors = 50 - mode;
+  }  
+  if ((210 < mode) && (mode < 220)){
+    passMode = 2;
+    passSpeed= 224 - mode;
+  }
+  if ((220 <= mode)&& (mode < 230)){
+    passMode = 3;
+    passSpeed= 234 - mode;
+  }
+  if ((230 <= mode)&&(mode < 240)){
+    passMode = 4;
+    passSpeed= 244 - mode;
+  }
+  if ((240 <= mode)&&(mode < 256)){
+    passMode = 5;
+    passSpeed= (263 - mode)* 2;
+  }
+  
+  pixelLength = 1 + ((200 - passSpeed) / 10);
+  
+  switch(passMode){
+     case 1: {//speedstrip strip
+      cycle(passSpeed, pixelLength);
+      break;
+    }  
+   
+    case 2: {
+       flash(flashColors);
+     
+      break;
+    }
+    case 3: {
+      rainbowCycle(passSpeed);
+      break;
+    }
+    case 4:{
+     rainbow(passSpeed);
+     break; 
+    }
+    case 5: {
+      meet(passSpeed);
+      break;
+    }
+    case 6: {
+      colorWipe(Color(0 , 10, 123), passSpeed);
+      colorWipe(Color(120, 30 , 0), passSpeed);
+      break;
+    }
+    default: break;  
+  } 
+}
+
 

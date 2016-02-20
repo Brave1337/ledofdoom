@@ -288,9 +288,9 @@ void flash(byte colorSet){
   //actual led code
 
   solid(color1);
-  delay(100);
+  delay(400);
    solid(color2);
-  delay(100);
+  delay(400);
 }
 
 //END HELPER FUNCTIONS
@@ -326,7 +326,7 @@ void loop() {
   byte passSpeed;//the delay value to be passed in 
   byte passMode;//determines what to use based on the passed in mode
 
- mode = 144;
+ mode = 228;
   if (mode <= 99){
     passMode = 1; //speed strip code
     passSpeed = ((100 - mode)* 2);
@@ -341,7 +341,7 @@ void loop() {
   }
   if ((220 <= mode)&& (mode < 230)){
     passMode = 3;//rainbow cycle
-    passSpeed= 254 - mode;
+    passSpeed= 238 - mode;
   }
   if ((230 <= mode)&&(mode < 240)){
     passMode = 4;//rainbow

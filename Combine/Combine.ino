@@ -276,9 +276,9 @@ void flash(byte colorSet){
   //actual led code
 
   solid(color1);
-  delay(100);
+  delay(400);
    solid(color2);
-  delay(100);
+  delay(400);
 }
 
 //####################################################################

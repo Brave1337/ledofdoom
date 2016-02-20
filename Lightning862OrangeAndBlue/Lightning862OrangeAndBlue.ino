@@ -167,16 +167,17 @@ void solid(uint32_t stripColor){
  byte i;
   for (i=0; i < strip.numPixels(); i++) {
       strip.setPixelColor(i, stripColor);
-      strip.show();
   }
+  strip.show();
 }
 
 void flash(byte colorSet){
 
- uint32_t color1;
+ uint32_t color1 = 5432;
  uint32_t color2;
-
- switch (colorSet / 10){//decides which colors are what
+ byte colorSwitch1= colorSet/ 10;
+ byte colorSwitch2= colorSet % 10;
+ switch (colorSwitch1){//decides which colors are what
     
   case 0:{
     color1= Color(0, 0, 0);//0black 
@@ -189,12 +190,12 @@ void flash(byte colorSet){
   }
   
   case 2:{
-    color1= Color(0, 0, 128);//2blue 
+    color1= Color(0, 0, 129);//2blue 
     break;
   }
   
   case 3:{
-    color1= Color(129, 120, 0);//3yellow
+    color1=Color(129, 120, 0);//3yellow
     break;
   }
 
@@ -227,9 +228,10 @@ void flash(byte colorSet){
     color1= Color(129, 0, 67);//9 pionk
     break;
   }
+  default:break;
  }
-//color 2
- switch (colorSet % 10){//decides which colors are what
+
+ switch (colorSwitch2){//decides which colors are what
     
   case 0:{
     color2= Color(0, 0, 0);//0black 
@@ -242,7 +244,7 @@ void flash(byte colorSet){
   }
   
   case 2:{
-    color2= Color(0, 0, 128);//2blue
+    color2= Color(0, 0, 129);//2blue
     break;
   }
 
@@ -252,7 +254,7 @@ void flash(byte colorSet){
   }
 
   case 4:{
-    color2= Color(0, 129, 0));//4green
+    //color2= Color(0, 129, 0);//4green
     break;
   }
 
@@ -280,14 +282,15 @@ void flash(byte colorSet){
     color2= Color(129, 0, 67);//9 pionk
     break;
   }
+  default:break;
  }
  
   //actual led code
-  
+
   solid(color1);
-  delay(20);
-  solid(color2);
-  delay(20);
+  delay(100);
+   solid(color2);
+  delay(100);
 }
 
 //END HELPER FUNCTIONS
@@ -303,7 +306,7 @@ void setup() {
 #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
   clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
 #endif
-  
+  Serial.begin(9600);
   strip.begin();
   strip.show();
   
@@ -323,14 +326,14 @@ void loop() {
   byte passSpeed;//the delay value to be passed in 
   byte passMode;//determines what to use based on the passed in mode
 
- mode = 99;
+ mode = 144;
   if (mode <= 99){
     passMode = 1; //speed strip code
     passSpeed = ((100 - mode)* 2);
   }
   if ((100 <= mode) && (mode < 200)){
     passMode = 2; //2 color flash
-    flashColors = 100 - mode;
+    flashColors = mode - 100;
   }  
   if ((200 <= mode) && (mode < 220)){
     passMode = 6; //orange and blue color wipe
@@ -338,7 +341,7 @@ void loop() {
   }
   if ((220 <= mode)&& (mode < 230)){
     passMode = 3;//rainbow cycle
-    passSpeed= 234 - mode;
+    passSpeed= 254 - mode;
   }
   if ((230 <= mode)&&(mode < 240)){
     passMode = 4;//rainbow
@@ -350,7 +353,7 @@ void loop() {
   }
 
   pixelLength = 1 + ((200 - passSpeed) / 10);
-  
+
   switch(passMode){//switch structure for the LED mode
      
      case 1: {//do speed chaser mode
@@ -363,7 +366,7 @@ void loop() {
       break;
     }
     
-    case 3: {
+    case 3: {//distributed rainbow
       rainbowCycle(passSpeed);
       break;
     }
@@ -379,14 +382,14 @@ void loop() {
     }
     
     case 6: {
-      colorWipe(Color(0 , 9, 128), passSpeed);
+      colorWipe(Color(0 , 0, 129), passSpeed);
       colorWipe(Color(130, 30 , 0), passSpeed);
       break;
     }
     case 9: {
       //solid(Color(0, 0, 0));//0black
     // solid(Color(130, 30, 0));//1orange
-     //solid(Color(0, 0, 128));//2blue
+    //solid(Color(0, 0, 129));//2blue
     // solid(Color(129, 120, 0));//3yellow
     // solid(Color(0, 129, 0));//4green
     // solid(Color(127, 0, 0));//5red
@@ -394,6 +397,7 @@ void loop() {
      //solid(Color(100, 129, 129));//7 White
     //solid(Color(67, 0, 129));//8purp
     //solid(Color(129, 0, 67));//9 pionk
+   
     }
     default: break;  
   } 

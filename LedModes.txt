@@ -1,0 +1,31 @@
+				LED GUIDE by Matthew Pelukas
+Example --  Mode no.: (NAME): (Passvalues):(Additional Info)
+
+Mode 1: Growing Chaser: 0-99:*speed* - chaser grows with speed
+
+Mode 2: Two Color Blinking: 100-199: Second didgit (1[3]4) is color one, First digit (13[4]) is color two
+0 black
+1 orange
+2 blue
+3 yellow
+4 green
+5 red
+6 cyan
+7 White
+8 purple
+9 pink
+
+Mode 3: Orange and blue Wipe: 200-219: *speed*
+
+Mode 4: Distributed Rainbow: 220-229: *Speed*
+
+Mode 5: Section of Rainbow: 230-239: *speed*
+
+Mode 6: Bouncing Chasers: 240-255: *speed* -chasers grow with speed
+
+
+
+
+Footer:
+*speed* -- the LEDs go faster as the number increases.
+

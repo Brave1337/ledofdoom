@@ -242,7 +242,7 @@ void flash(byte colorSet){
   }
 
   case 4:{
-    //color2= Color(0, 129, 0);//4green
+    color2= Color(0, 129, 0);//4green
     break;
   }
 

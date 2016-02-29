@@ -1,49 +1,65 @@
-#include "Adafruit_WS2801.h" 
+#include "Adafruit_WS2801.h"
+#include <SPI.h> 
 #ifdef __AVR_ATtiny85__
  #include <avr/power.h>
 #endif
-/*
-// fake class
-class cycleRibbonSize
-{
-  public:
-    int fakerSpeed;
-     uint8_t roboSpeed = 5;//temp
-  cycleRibbonSize(speedinput)
-  {
- //robospeed = whatever the speed is returned as
- unit8_t  = roboSpeed 
 
-  }
-  int figureOutSize(int f_speed);  
-};
-
-int cycleRibbonSize::figureOutSize(int f_speed)
-{
-  
-}
-*/
-
-
-
-
+//global vars
 uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
 uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
 
+uint8_t iterator = 0; //used in all of the loops
+uint8_t lastMode = 0; // 0 is nothing
+uint8_t currentMode = 0; // I am lazy
 
 uint8_t mode;//what would be passed in by
-// Don't forget to connect the ground wire to Arduino ground,
-// and the +5V wire to a +5V supply
 
-// Set the first variable to the NUMBER of pixels. 25 = 25 pixels in a row
+//globals for update check
+unsigned long currentMillis = millis(); //time since start-up, lasts 50 days before overflow
+unsigned long previousMillis = 0;  // will store last time LEDs were updated
+
+
 Adafruit_WS2801 strip = Adafruit_WS2801(32, dataPin, clockPin);
+              
+              // HELPER FUNCTIONS
+//#####################################################              
+//Initialize SPI slave.
+void SlaveInit(void) {
+  // Initialize SPI pins.
+  pinMode(SCK, INPUT);
+  pinMode(MOSI, INPUT);
+//pinMode(MISO, INPUT);
+  pinMode(SS, INPUT);
+ pinMode(MISO, INPUT);
+  // Enable SPI as slave.
+  SPCR = (1 << SPE);
+}
+// SPI Transfer.
+byte SPItransfer(byte value) {
+  SPDR = value;
+  while(!(SPSR & (1<<SPIF)));
+  return SPDR;
+}
+//############################################################
 
-// Optional: leave off pin numbers to use hardware SPI
-// (pinout is then specific to each board and can't be changed)
-//Adafruit_WS2801 strip = Adafruit_WS2801(25);
-
-//HELPER FUNCTIONS
-
+bool updater(uint16_t interval, uint16_t restriction){
+  currentMillis = millis();
+  bool checker = currentMillis - previousMillis >= interval;
+  
+  if ((lastMode != currentMode) || (iterator == restriction) ){
+    iterator = 0; 
+    lastMode = currentMode;
+  }
+  
+  if (checker == true) {
+    // save the last time you blinked the LEDs
+    previousMillis = currentMillis;
+  }
+  return checker;
+}
+                 
+                  //LED HElPER FUNCTIONS
+//#############################################################
 // Create a 24 bit color value from R,G,B
 uint32_t Color(byte r, byte g, byte b)
 {
@@ -56,7 +72,43 @@ uint32_t Color(byte r, byte g, byte b)
   return c;
 }
 
- void rainbow(uint8_t wait) {
+void solid(uint32_t stripColor){
+ byte i;
+  for (i=0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, stripColor);
+  }
+  strip.show();
+}
+
+// fill the dots one after the other with said color
+// good for testing purposes
+void colorWipe(uint32_t c, uint8_t wait) {
+  currentMode = 200; 
+  updater(wait, strip.numPixels());
+  strip.setPixelColor(iterator, c);
+  strip.show();
+  iterator += 1;
+}
+
+
+void cycle(uint8_t spd, uint8_t pixLen){ // mode 1 DONE 
+  currentMode =  1;
+  bool doStuff = updater(spd, strip.numPixels());
+  if(doStuff==true){
+    if (pixLen < 18){ 
+      strip.setPixelColor(iterator - pixLen, Color(0, 0, 129));
+      strip.setPixelColor(iterator , Color(130, 60, 0));//orange
+      strip.setPixelColor((strip.numPixels()- pixLen) + iterator, Color(0, 0, 129));//clear out end
+      strip.show();
+      } 
+    else {
+      solid(Color(130, 60, 0));
+    }  
+  iterator += 1 ;
+  }
+}
+
+ void rainbow(uint8_t wait) { // mode 4 KYLE PLS CLEAN ME I AM SO OUT OF ORDER
   int i, j;
    
   for (j=0; j < 256; j++) {     // 3 cycles of all 256 colors in the wheel
@@ -70,7 +122,7 @@ uint32_t Color(byte r, byte g, byte b)
 
 // Slightly different, this one makes the rainbow wheel equally distributed 
 // along the chain
-void rainbowCycle(uint8_t wait) {
+void rainbowCycle(uint8_t wait) {// mode 3
 int i, j;
  
  for (j=0; j < 256 * 5; j++) {     // 5 cycles of all 25 colors in the wheel
@@ -85,21 +137,6 @@ int i, j;
     delay(wait);
   }
 }
-
-// fill the dots one after the other with said color
-// good for testing purposes
-void colorWipe(uint32_t c, uint8_t wait) {
-  int i;
-  
-  for (i=0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, c);
-      strip.show();
-      delay(wait);
-  }
-}
-
-
-
 
 //Input a value 0 to 255 to get a color value.
 //The colours are a transition r - g -b - back to r
@@ -118,66 +155,49 @@ uint32_t Wheel(byte WheelPos)
   }
 }
 
-void cycle(uint8_t spd, uint8_t pixLen){ 
-  uint8_t r = 0; 
-  if (pixLen < 18){
-    for( r ; r < strip.numPixels(); r++){
-    strip.setPixelColor(r - pixLen, Color(0, 0, 129));
-    strip.setPixelColor( r , Color(130, 60, 0));//orange
-    strip.setPixelColor((strip.numPixels()- pixLen) + r, Color(0, 0, 129));//clear out end
-    strip.show();
-    delay(spd);
-    }
-  } 
-  else {
-    colorWipe(Color(130, 60, 0),0);
-  }  
-}
 
-
-void meet(uint16_t spd){
+void meet(uint16_t spd){// mode 5 Done
   uint8_t pixLen = 4;
-  for (uint8_t r = 0;r < (pixLen/2 + strip.numPixels())/2; r++){
-    if ( r !=  ((pixLen / 2 + strip.numPixels())/2) ){
-      strip.setPixelColor(r, Color(130, 60, 0));  
-      strip.setPixelColor(strip.numPixels()-1 - r, Color(130, 60, 0));
-      strip.setPixelColor(r - pixLen , Color(0, 0, 129));
-      strip.setPixelColor(strip.numPixels()-1 - r + pixLen, Color(0, 0, 129));
+  byte halfway = ((pixLen / 2 + strip.numPixels())/2);
+  currentMode = 5;
+  if(updater(spd, pixLen/2 + strip.numPixels() )){
+   if (iterator <  halfway -1 ){
+    strip.setPixelColor(iterator, Color(130, 60, 0));  
+    strip.setPixelColor(strip.numPixels()-1 - iterator, Color(130, 60, 0));
+    strip.setPixelColor(iterator - pixLen , Color(0, 0, 129));
+    strip.setPixelColor(strip.numPixels()-1 - iterator + pixLen, Color(0, 0, 129));
+    strip.show();
+      Serial.println(iterator);
+    iterator += 1;
+    }
+    if (iterator == halfway -1){
+    delay(spd);   
+      Serial.println(iterator);
+      Serial.print("UGHASIG");
+     iterator += (1 + pixLen/2);
+    }
+    if ((iterator > (pixLen/2) + (strip.numPixels()/2)) &&  (iterator < pixLen/2 + strip.numPixels())){
+  Serial.println(iterator);
+      strip.setPixelColor(iterator, Color(130, 60, 0));  
+      strip.setPixelColor(strip.numPixels()-1 - iterator, Color(130, 60, 0));
+      strip.setPixelColor(iterator - pixLen , Color(0, 0, 129));
+      strip.setPixelColor(strip.numPixels()-1 - iterator + pixLen, Color(0, 0, 129));
       strip.show();
-      delay(spd);
-    }
-    else{
-      delay(spd);
-    }
-    Serial.println(r);
+      iterator += 1;
+    }  
   }
-  for (uint8_t r = strip.numPixels()/2 +3;r < pixLen/2 + strip.numPixels(); r++){
-  
-      strip.setPixelColor(r, Color(120, 60, 0));  
-      strip.setPixelColor(strip.numPixels()-1 - r, Color(120, 60, 0));
-      strip.setPixelColor(r - pixLen , Color(0, 0, 129));
-      strip.setPixelColor(strip.numPixels()-1 - r + pixLen, Color(0, 0, 129));
-      strip.show();
-      delay(spd);
-    Serial.println(r);
-    }
+
 }
 
 
-void solid(uint32_t stripColor){
- byte i;
-  for (i=0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, stripColor);
-  }
-  strip.show();
-}
 
-void flash(byte colorSet){
-
+void flash(byte colorSet){//mode 2 DONE
+currentMode = 2;
  uint32_t color1 = 5432;
  uint32_t color2;
  byte colorSwitch1= colorSet/ 10;
  byte colorSwitch2= colorSet % 10;
+ 
  switch (colorSwitch1){//decides which colors are what
     
   case 0:{
@@ -255,7 +275,7 @@ void flash(byte colorSet){
   }
 
   case 4:{
-    //color2= Color(0, 129, 0);//4green
+    color2= Color(0, 129, 0);//4green
     break;
   }
 
@@ -287,39 +307,44 @@ void flash(byte colorSet){
  }
  
   //actual led code
-
-  solid(color1);
-  delay(400);
-   solid(color2);
-  delay(400);
+  if(updater(500, 2)){
+    switch(iterator){
+      case 0:{
+        solid(color1);
+        iterator += 1;
+        break;
+      }
+      case 1:{
+        solid(color2);
+        iterator += 1;
+        break;
+      }
+      default:break;
+    }
+  } 
 }
 
-//END HELPER FUNCTIONS
-//###########################################################
-//###########################################################
-//###########################################################
+//####################################################################
 
-
-
-//Setup and Loop
-
-void setup() {
-#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
-  clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
-#endif
+// The setup() function runs each initialization or reset
+void setup() {//only define theses for led
+  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
+   clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
+  #endif
+  // Initialize serial for troubleshooting
   Serial.begin(9600);
+   // Initialize SPI Slave.
+  SlaveInit();
+  
+  //LED Initializing
   strip.begin();
   strip.show();
   
   //mode set
-  mode = 4;
-
-
-  solid(Color(0, 0, 129));
-
+  mode = 0;
+  mode = SPItransfer(255); 
 }
-
-
+  
 void loop() {
   byte flashColors;//used in mode 2
   
@@ -327,7 +352,7 @@ void loop() {
   byte passSpeed;//the delay value to be passed in 
   byte passMode;//determines what to use based on the passed in mode
 
- mode = 248;
+ mode = SPItransfer(255);
   if (mode <= 99){
     passMode = 1; //speed strip code
     passSpeed = ((100 - mode)* 2);
@@ -338,11 +363,11 @@ void loop() {
   }  
   if ((200 <= mode) && (mode < 220)){
     passMode = 6; //orange and blue color wipe
-    passSpeed= 224 - mode;
+    passSpeed= 254 - mode;
   }
   if ((220 <= mode)&& (mode < 230)){
     passMode = 3;//rainbow cycle
-    passSpeed= 235 - mode;
+    passSpeed= 234 - mode;
   }
   if ((230 <= mode)&&(mode < 240)){
     passMode = 4;//rainbow
@@ -354,7 +379,7 @@ void loop() {
   }
 
   pixelLength = 1 + ((200 - passSpeed) / 10);
-
+  
   switch(passMode){//switch structure for the LED mode
      
      case 1: {//do speed chaser mode
@@ -367,7 +392,7 @@ void loop() {
       break;
     }
     
-    case 3: {//distributed rainbow
+    case 3: {//do distributed rainbow
       rainbowCycle(passSpeed);
       break;
     }
@@ -390,7 +415,7 @@ void loop() {
     case 9: {
       //solid(Color(0, 0, 0));//0black
     // solid(Color(130, 30, 0));//1orange
-    //solid(Color(0, 0, 129));//2blue
+     //solid(Color(0, 0, 129));//2blue
     // solid(Color(129, 120, 0));//3yellow
     // solid(Color(0, 129, 0));//4green
     // solid(Color(127, 0, 0));//5red
@@ -398,7 +423,6 @@ void loop() {
      //solid(Color(100, 129, 129));//7 White
     //solid(Color(67, 0, 129));//8purp
     //solid(Color(129, 0, 67));//9 pionk
-   
     }
     default: break;  
   } 

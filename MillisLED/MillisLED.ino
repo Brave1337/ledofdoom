@@ -27,8 +27,8 @@ int cycleRibbonSize::figureOutSize(int f_speed)
 
 
 
-uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
-uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
+const uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
+const uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
 // Don't forget to connect the ground wire to Arduino ground,
 // and the +5V wire to a +5V supply
 
@@ -49,6 +49,20 @@ Adafruit_WS2801 strip = Adafruit_WS2801(32, dataPin, clockPin);
 // Optional: leave off pin numbers to use hardware SPI
 // (pinout is then specific to each board and can't be changed)
 //Adafruit_WS2801 strip = Adafruit_WS2801(25);
+
+
+
+// Colors
+const uint32_t COLOR_BLACK = Color(0, 0, 0);//0black
+const uint32_t COLOR_ORANGE = Color(130, 60, 0);//1orange
+const uint32_t COLOR_BLUE = Color(0, 0, 129);//2blue
+const uint32_t COLOR_YELLOW = Color(129, 120, 0);//3yellow
+const uint32_t COLOR_GREEN = Color(0, 129, 0);//4green
+const uint32_t COLOR_RED = Color(127, 0, 0);//5red
+const uint32_t COLOR_CYAN = Color(0, 129, 64);//6cyan
+const uint32_t COLOR_WHITE = Color(100, 129, 129);//7 White
+const uint32_t COLOR_PURPLE = Color(67, 0, 129);//8purp
+const uint32_t COLOR_PINK = Color(129, 0, 67);//9 pionk
 
 //HELPER FUNCTIONS
 //#######################################################
@@ -85,7 +99,7 @@ uint32_t Color(byte r, byte g, byte b)
 }
 
 void solid(uint32_t stripColor){
- byte i;
+ byte i = 0;
   for (i=0; i < strip.numPixels(); i++) {
       strip.setPixelColor(i, stripColor);
   }
@@ -108,13 +122,13 @@ void cycle(uint8_t spd, uint8_t pixLen){ // mode 1 DONE
   bool doStuff = updater(spd, strip.numPixels());
   if(doStuff==true){
     if (pixLen < 18){ 
-      strip.setPixelColor(iterator - pixLen, Color(0, 0, 129));
-      strip.setPixelColor(iterator , Color(130, 60, 0));//orange
-      strip.setPixelColor((strip.numPixels()- pixLen) + iterator, Color(0, 0, 129));//clear out end
+      strip.setPixelColor(iterator - pixLen, COLOR_BLUE);
+      strip.setPixelColor(iterator , COLOR_ORANGE);//orange
+      strip.setPixelColor((strip.numPixels()- pixLen) + iterator, COLOR_BLUE);//clear out end
       strip.show();
       } 
     else {
-      solid(Color(130, 60, 0));
+      solid(COLOR_ORANGE);
     }  
   iterator += 1 ;
   }
@@ -170,14 +184,16 @@ uint32_t Wheel(byte WheelPos)
 
 void meet(uint16_t spd){// mode 5
   uint8_t pixLen = 4;
-  byte halfway = ((pixLen / 2 + strip.numPixels())/2);
+  const byte halfway = ((pixLen / 2 + strip.numPixels())/2);
+  const byte LOWER_BOUND = (pixLen/2) + (strip.numPixels()/2);
+  const byte UPPER_BOUND = pixLen/2 + strip.numPixels();
   currentMode = 5;
   if(updater(spd, pixLen/2 + strip.numPixels() )){
    if (iterator <  halfway -1 ){
-    strip.setPixelColor(iterator, Color(130, 60, 0));  
-    strip.setPixelColor(strip.numPixels()-1 - iterator, Color(130, 60, 0));
-    strip.setPixelColor(iterator - pixLen , Color(0, 0, 129));
-    strip.setPixelColor(strip.numPixels()-1 - iterator + pixLen, Color(0, 0, 129));
+    strip.setPixelColor(iterator, COLOR_ORANGE);  
+    strip.setPixelColor(strip.numPixels()-1 - iterator, COLOR_ORANGE);
+    strip.setPixelColor(iterator - pixLen , COLOR_BLUE);
+    strip.setPixelColor(strip.numPixels()-1 - iterator + pixLen, COLOR_BLUE);
     strip.show();
     iterator += 1;
     }
@@ -186,12 +202,11 @@ void meet(uint16_t spd){// mode 5
     delay(spd);   
     iterator += (1 + pixLen/2);
     }
-    if ((iterator > (pixLen/2) + (strip.numPixels()/2)) &&  (iterator < pixLen/2 + strip.numPixels())){
-  Serial.println(iterator);
-      strip.setPixelColor(iterator, Color(130, 60, 0));  
-      strip.setPixelColor(strip.numPixels()-1 - iterator, Color(130, 60, 0));
-      strip.setPixelColor(iterator - pixLen , Color(0, 0, 129));
-      strip.setPixelColor(strip.numPixels()-1 - iterator + pixLen, Color(0, 0, 129));
+    if ((iterator > LOWER_BOUND) &&  (iterator < UPPER_BOUND)){
+      strip.setPixelColor(iterator, COLOR_ORANGE);  
+      strip.setPixelColor(strip.numPixels()-1 - iterator, COLOR_ORANGE);
+      strip.setPixelColor(iterator - pixLen , COLOR_BLUE);
+      strip.setPixelColor(strip.numPixels()-1 - iterator + pixLen, COLOR_BLUE);
       strip.show();
       iterator += 1;
     }  
@@ -202,61 +217,61 @@ void meet(uint16_t spd){// mode 5
 
 
 void flash(byte colorSet){//mode 2
-currentMode = 2;
- uint32_t color1 = 5432;
- uint32_t color2;
+ currentMode = 2;
+ uint32_t color1 = 0;
+ uint32_t color2 = 0;
  byte colorSwitch1= colorSet/ 10;
  byte colorSwitch2= colorSet % 10;
  
  switch (colorSwitch1){//decides which colors are what
     
   case 0:{
-    color1= Color(0, 0, 0);//0black 
+    color1=COLOR_BLACK;//0black 
     break;
   }
   
   case 1:{
-    color1= Color(130, 30, 0);//1orange 
+    color1= COLOR_ORANGE;//1orange 
     break;
   }
   
   case 2:{
-    color1= Color(0, 0, 129);//2blue 
+    color1= COLOR_BLUE;//2blue 
     break;
   }
   
   case 3:{
-    color1=Color(129, 120, 0);//3yellow
+    color1=COLOR_YELLOW;//3yellow
     break;
   }
 
   case 4:{
-    color1= Color(0, 129, 0);//4green
+    color1= COLOR_GREEN;//4green
     break;
   }
 
   case 5:{
-    color1= Color(127, 0, 0);//5red
+    color1= COLOR_RED;//5red
     break;
   }
 
   case 6:{
-    color1= Color(0, 129, 64);//6cyan
+    color1= COLOR_CYAN;//6cyan
     break;
   }
   
   case 7:{
-    color1= Color(100, 129, 129);//7 White
+    color1= COLOR_WHITE;//7 White
     break;
   }
   
   case 8:{
-    color1= Color(67, 0, 129);//8purp
+    color1= COLOR_PURPLE;//8purp
     break;
   }
   
   case 9:{
-    color1= Color(129, 0, 67);//9 pionk
+    color1= COLOR_PINK;//9 pionk
     break;
   }
   default:break;
@@ -265,52 +280,52 @@ currentMode = 2;
  switch (colorSwitch2){//decides which colors are what
     
   case 0:{
-    color2= Color(0, 0, 0);//0black 
+    color2=COLOR_BLACK;//0black 
     break;
   }
   
   case 1:{
-    color2= Color(130, 30, 0);//1orange 
+    color2= COLOR_ORANGE;//1orange 
     break;
   }
   
   case 2:{
-    color2= Color(0, 0, 129);//2blue
+    color2= COLOR_BLUE;//2blue
     break;
   }
 
   case 3:{
-    color2= Color(129, 120, 0);//3yellow
+    color2= COLOR_YELLOW;//3yellow
     break;
   }
 
   case 4:{
-    color2= Color(0, 129, 0);//4green
+    color2= COLOR_GREEN;//4green
     break;
   }
 
   case 5:{
-    color2= Color(127, 0, 0);//5red
+    color2= COLOR_RED;//5red
     break;
   }
 
   case 6:{
-    color2= Color(0, 129, 64);//6cyan
+    color2= COLOR_CYAN;//6cyan
     break;
   }
   
   case 7:{
-    color2= Color(100, 129, 129);//7 White
+    color2= COLOR_WHITE;//7 White
     break;
   }
   
   case 8:{
-    color2= Color(67, 0, 129);//8purp
+    color2= COLOR_PURPLE;//8purp
     break;
   }
   
   case 9:{
-    color2= Color(129, 0, 67);//9 pionk
+    color2= COLOR_PINK;//9 pionk
     break;
   }
   default:break;
@@ -355,7 +370,7 @@ void setup() {
   mode = 4;
 
 
-  solid(Color(0, 0, 129));
+  solid(COLOR_BLUE);
 
 }
 
@@ -429,15 +444,15 @@ void loop() {
     }
     case 9: {
     //solid(Color(0, 0, 0));//0black
-    // solid(Color(130, 30, 0));//1orange
-    //solid(Color(0, 0, 129));//2blue
-    // solid(Color(129, 120, 0));//3yellow
-    // solid(Color(0, 129, 0));//4green
-    // solid(Color(127, 0, 0));//5red
-    // solid(Color(0, 129, 64));//6cyan
-    //solid(Color(100, 129, 129));//7 White
-    //solid(Color(67, 0, 129));//8purp
-    //solid(Color(129, 0, 67));//9 pionk
+    // solid(COLOR_ORANGE);//1orange
+    //solid(COLOR_BLUE);//2blue
+    // solid(COLOR_YELLOW);//3yellow
+    // solid(COLOR_GREEN);//4green
+    // solid(COLOR_RED);//5red
+    // solid(COLOR_CYAN);//6cyan
+    //solid(COLOR_WHITE);//7 White
+    //solid(COLOR_PURPLE);//8purp
+    //solid(COLOR_PINK);//9 pionk
    
     }
     default: break;  

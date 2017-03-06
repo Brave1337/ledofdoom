@@ -1,5 +1,4 @@
-#include "Adafruit_WS2801.h"
-#include "SPI.h" 
+#include "Adafruit_WS2801.h" 
 #ifdef __AVR_ATtiny85__
  #include <avr/power.h>
 #endif
@@ -37,7 +36,7 @@ uint8_t mode;//what would be passed in by
 // and the +5V wire to a +5V supply
 
 // Set the first variable to the NUMBER of pixels. 25 = 25 pixels in a row
-Adafruit_WS2801 strip = Adafruit_WS2801(32, dataPin, clockPin);
+Adafruit_WS2801 strip = Adafruit_WS2801(28, dataPin, clockPin);
 
 // Optional: leave off pin numbers to use hardware SPI
 // (pinout is then specific to each board and can't be changed)
@@ -136,7 +135,7 @@ void cycle(uint8_t spd, uint8_t pixLen){
 }
 
 
-void meet(uint8_t spd){
+void meet(uint16_t spd){
   uint8_t pixLen = 4;
   for (uint8_t r = 0;r < (pixLen/2 + strip.numPixels())/2; r++){
     if ( r !=  ((pixLen / 2 + strip.numPixels())/2) ){
@@ -150,6 +149,7 @@ void meet(uint8_t spd){
     else{
       delay(spd);
     }
+    Serial.println(r);
   }
   for (uint8_t r = strip.numPixels()/2 +3;r < pixLen/2 + strip.numPixels(); r++){
   
@@ -159,6 +159,7 @@ void meet(uint8_t spd){
       strip.setPixelColor(strip.numPixels()-1 - r + pixLen, Color(0, 0, 129));
       strip.show();
       delay(spd);
+    Serial.println(r);
     }
 }
 
@@ -288,9 +289,9 @@ void flash(byte colorSet){
   //actual led code
 
   solid(color1);
-  delay(100);
+  delay(400);
    solid(color2);
-  delay(100);
+  delay(400);
 }
 
 //END HELPER FUNCTIONS
@@ -326,10 +327,14 @@ void loop() {
   byte passSpeed;//the delay value to be passed in 
   byte passMode;//determines what to use based on the passed in mode
 
- mode = 144;
-  if (mode <= 99){
+ mode = 248;
+  if (mode <= 49){
     passMode = 1; //speed strip code
-    passSpeed = ((100 - mode)* 2);
+    passSpeed = ((50 - mode)* 4);
+  }
+  if ((49 < mode) && (mode < 100)){
+    passMode = 1; //speed strip code
+    passSpeed = ((100 - mode)* 4);
   }
   if ((100 <= mode) && (mode < 200)){
     passMode = 2; //2 color flash
@@ -341,7 +346,7 @@ void loop() {
   }
   if ((220 <= mode)&& (mode < 230)){
     passMode = 3;//rainbow cycle
-    passSpeed= 254 - mode;
+    passSpeed= 235 - mode;
   }
   if ((230 <= mode)&&(mode < 240)){
     passMode = 4;//rainbow

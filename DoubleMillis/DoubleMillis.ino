@@ -1,12 +1,36 @@
-#include "Adafruit_WS2801.h"
-#include <SPI.h> 
+#include "Adafruit_WS2801.h" 
 #ifdef __AVR_ATtiny85__
  #include <avr/power.h>
 #endif
+/*
+// fake class
+class cycleRibbonSize
+{
+  public:
+    int fakerSpeed;
+     uint8_t roboSpeed = 5;//temp
+  cycleRibbonSize(speedinput)
+  {
+ //robospeed = whatever the speed is returned as
+ unit8_t  = roboSpeed 
 
-//global vars
+  }
+  int figureOutSize(int f_speed);  
+};
+
+int cycleRibbonSize::figureOutSize(int f_speed)
+{
+  
+}
+*/
+
+
+
+
 const uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
 const uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
+// Don't forget to connect the ground wire to Arduino ground,
+// and the +5V wire to a +5V supply
 
 uint8_t iterator = 0; //used in all of the loops
 uint8_t lastMode = 0; // 0 is nothing
@@ -18,29 +42,26 @@ uint8_t mode;//what would be passed in by
 unsigned long currentMillis = millis(); //time since start-up, lasts 50 days before overflow
 unsigned long previousMillis = 0;  // will store last time LEDs were updated
 
+////////////IMPORTANT SHIT
+//################################################################################
+// Set the first variable to the NUMBER of pixels. 25 = 25 pixels in a row
+Adafruit_WS2801 strip = Adafruit_WS2801(64, dataPin, clockPin);
+//##############################################################################
 
-Adafruit_WS2801 strip = Adafruit_WS2801(32, dataPin, clockPin);
-              
-              // HELPER FUNCTIONS
-//#####################################################              
-//Initialize SPI slave.
-void SlaveInit(void) {
-  // Initialize SPI pins.
-  pinMode(SCK, INPUT);//52
-  pinMode(MOSI, INPUT);//51
-//pinMode(MISO, INPUT);
-  pinMode(SS, INPUT);//53
- pinMode(MISO, INPUT);//50
-  // Enable SPI as slave.
-  SPCR = (1 << SPE);
-}
-// SPI Transfer.
-byte SPItransfer(byte value) {
-  SPDR = value;
-  while(!(SPSR & (1<<SPIF)));
-  return SPDR;
-}
-//############################################################
+
+
+// Optional: leave off pin numbers to use hardware SPI
+// (pinout is then specific to each board and can't be changed)
+//Adafruit_WS2801 strip = Adafruit_WS2801(25);
+
+
+
+
+//HELPER FUNCTIONS
+//#######################################################
+//#######################################################
+
+//general
 
 bool updater(uint16_t interval, uint16_t restriction){
   currentMillis = millis();
@@ -57,10 +78,6 @@ bool updater(uint16_t interval, uint16_t restriction){
   }
   return checker;
 }
-                 
-                  //LED HElPER FUNCTIONS
-//#############################################################
-
 
 // Create a 24 bit color value from R,G,B
 uint32_t Color(byte r, byte g, byte b)
@@ -73,8 +90,7 @@ uint32_t Color(byte r, byte g, byte b)
   c |= r;
   return c;
 }
-
-//COLORS
+// Colors
 const uint32_t COLOR_BLACK = Color(0, 0, 0);//0black
 const uint32_t COLOR_ORANGE = Color(140, 55, 0);//1orange
 const uint32_t COLOR_BLUE = Color(0, 0, 129);//2blue
@@ -86,17 +102,10 @@ const uint32_t COLOR_WHITE = Color(100, 129, 129);//7 White
 const uint32_t COLOR_PURPLE = Color(67, 0, 129);//8purp
 const uint32_t COLOR_PINK = Color(129, 0, 67);//9 pionk
 
+
 void solid(uint32_t stripColor){
  byte i = 0;
   for (i=0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, stripColor);
-  }
-  strip.show();
-}
-
-void specialSolid (uint32_t stripColor)
-byte i = 0;
-  for (i=0; i < strip.numPixels()-5; i++) {
       strip.setPixelColor(i, stripColor);
   }
   strip.show();
@@ -115,45 +124,48 @@ void colorWipe(uint32_t c, uint8_t wait) {
 
 void cycle(uint8_t spd, uint8_t pixLen, byte vision ){// mode 1 DONE 
   currentMode =  1;
-  bool doStuff = updater(spd, strip.numPixels()- 4);
+  bool doStuff = updater(spd, (strip.numPixels()/2));
+  const byte adjustStrip = strip.numPixels()+ pixLen;
   if(doStuff==true){
     if (pixLen < 19){ 
-      strip.setPixelColor(iterator - pixLen, COLOR_BLUE);
-      strip.setPixelColor(iterator , COLOR_ORANGE);//orange
-      strip.setPixelColor((strip.numPixels()- pixLen-4) + iterator, COLOR_BLUE);//clear out end
+      strip.setPixelColor(iterator, COLOR_BLUE);
+      strip.setPixelColor(iterator + pixLen , COLOR_ORANGE);//orange
+      
+      strip.setPixelColor(adjustStrip - iterator, COLOR_BLUE);
+      strip.setPixelColor(strip.numPixels() - iterator , COLOR_ORANGE);//orange
+     
       } 
     else {
-      specialSolid(COLOR_WHITE);
+      solid(COLOR_WHITE);
     }  
     iterator += 1 ;
   }
   if(vision == 0){
-     strip.setPixelColor(strip.numPixels()- 5,COLOR_RED); 
     strip.setPixelColor(strip.numPixels()- 4,COLOR_RED); 
     strip.setPixelColor(strip.numPixels()- 3,COLOR_RED); 
     strip.setPixelColor(strip.numPixels()- 2,COLOR_RED); 
     strip.setPixelColor(strip.numPixels()- 1,COLOR_RED); 
+    strip.setPixelColor(strip.numPixels(),COLOR_RED); 
   } 
   if(vision == 1){
-    strip.setPixelColor(strip.numPixels()- 5, COLOR_YELLOW);
     strip.setPixelColor(strip.numPixels()- 4, COLOR_YELLOW);
     strip.setPixelColor(strip.numPixels()- 3, COLOR_YELLOW);
     strip.setPixelColor(strip.numPixels()- 2, COLOR_YELLOW);
     strip.setPixelColor(strip.numPixels()- 1, COLOR_YELLOW);
+    strip.setPixelColor(strip.numPixels(), COLOR_YELLOW);
   }
   if(vision == 2){
-    strip.setPixelColor(strip.numPixels()- 5, COLOR_GREEN);
     strip.setPixelColor(strip.numPixels()- 4, COLOR_GREEN);
     strip.setPixelColor(strip.numPixels()- 3, COLOR_GREEN);
     strip.setPixelColor(strip.numPixels()- 2, COLOR_GREEN);
     strip.setPixelColor(strip.numPixels()- 1, COLOR_GREEN);
+    strip.setPixelColor(strip.numPixels(), COLOR_GREEN);
   }
   strip.show();
 }
 
  void rainbow(uint8_t wait) { // mode 4 KYLE PLS CLEAN ME I AM SO OUT OF ORDER
-  uint16_t i = 0;
-  uint16_t j = 0;
+  int i, j;
    
   for (j=0; j < 256; j++) {     // 3 cycles of all 256 colors in the wheel
     for (i=0; i < strip.numPixels(); i++) {
@@ -167,8 +179,7 @@ void cycle(uint8_t spd, uint8_t pixLen, byte vision ){// mode 1 DONE
 // Slightly different, this one makes the rainbow wheel equally distributed 
 // along the chain
 void rainbowCycle(uint8_t wait) {// mode 3
-uint16_t i = 0;
-uint16_t j = 0;
+int i, j;
  
  for (j=0; j < 256 * 5; j++) {     // 5 cycles of all 25 colors in the wheel
     for (i=0; i < strip.numPixels(); i++) {
@@ -201,7 +212,7 @@ uint32_t Wheel(byte WheelPos)
 }
 
 
-void meet(uint16_t spd){// mode 5 Done
+void meet(uint16_t spd){// mode 5
   uint8_t pixLen = 4;
   const byte halfway = ((pixLen / 2 + strip.numPixels())/2);
   const byte LOWER_BOUND = (pixLen/2) + (strip.numPixels()/2);
@@ -216,6 +227,7 @@ void meet(uint16_t spd){// mode 5 Done
     strip.show();
     iterator += 1;
     }
+    
     if (iterator == halfway -1){
     delay(spd);   
     iterator += (1 + pixLen/2);
@@ -234,8 +246,8 @@ void meet(uint16_t spd){// mode 5 Done
 
 
 
-void flash(byte colorSet){//mode 2 DONE
-currentMode = 2;
+void flash(byte colorSet){//mode 2
+ currentMode = 2;
  uint32_t color1 = 0;
  uint32_t color2 = 0;
  byte colorSwitch1= colorSet/ 10;
@@ -244,7 +256,7 @@ currentMode = 2;
  switch (colorSwitch1){//decides which colors are what
     
   case 0:{
-    color1= COLOR_BLACK;//0black 
+    color1=COLOR_BLACK;//0black 
     break;
   }
   
@@ -298,7 +310,7 @@ currentMode = 2;
  switch (colorSwitch2){//decides which colors are what
     
   case 0:{
-    color2= COLOR_BLACK;//0black 
+    color2=COLOR_BLACK;//0black 
     break;
   }
   
@@ -350,7 +362,7 @@ currentMode = 2;
  }
  
   //actual led code
-  if(updater(500, 2)){
+  if (updater(500, 2)){
     switch(iterator){
       case 0:{
         solid(color1);
@@ -367,35 +379,39 @@ currentMode = 2;
   } 
 }
 
-//####################################################################
+//END HELPER FUNCTIONS
+//###########################################################
+//###########################################################
+//###########################################################
 
-// The setup() function runs each initialization or reset
-void setup() {//only define theses for led
-  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
-   clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
-  #endif
-  // Initialize serial for troubleshooting
+
+
+//Setup and Loop
+
+void setup() {
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
+  clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
+#endif
   Serial.begin(9600);
-   // Initialize SPI Slave.
-  SlaveInit();
-  
-  //LED Initializing
   strip.begin();
   strip.show();
   
   //mode set
-  mode = 0;
-  mode = SPItransfer(255); 
+  mode = 4;
+
+
+  solid(Color(0,0,129));
+
 }
-  
+
+
 void loop() {
   byte flashColors;//used in mode 2
-  
+  byte visionTarget;
   byte pixelLength;//determines pixel lenth
-  byte passSpeed;//the delay value to be passed in 
+  uint16_t passSpeed;//the delay value to be passed in 
   byte passMode;//determines what to use based on the passed in mode
-
- mode = SPItransfer(255);
+ mode = 26;
   if (mode <= 33){
     passMode = 1; //speed strip code
     passSpeed = ((33 - mode)* 6);
@@ -431,12 +447,13 @@ void loop() {
     passMode = 6;//orange and blue color wipe
     passSpeed= (263 - mode) * 2;
   }
+
   pixelLength = 1 + ((200 - passSpeed) / 10);
-  
+
   switch(passMode){//switch structure for the LED mode
      
      case 1: {//do speed chaser mode
-      cycle(passSpeed, pixelLength);
+      cycle(passSpeed, pixelLength, visionTarget);
       break;
     }  
     
@@ -445,13 +462,13 @@ void loop() {
       break;
     }
     
-    case 3: {//do distributed rainbow
+    case 3: {//distributed rainbow
       rainbowCycle(15);
       break;
     }
     
     case 4:{
-     rainbow(15);
+     rainbow(passSpeed);
      break; 
     }
     
@@ -466,19 +483,18 @@ void loop() {
       break;
     }
     case 9: {
-      //solid(COLOR_BLACK);//0black
+    //solid(Color(0, 0, 0));//0black
     // solid(COLOR_ORANGE);//1orange
-     //solid(COLOR_BLUE);//2blue
+    //solid(COLOR_BLUE);//2blue
     // solid(COLOR_YELLOW);//3yellow
     // solid(COLOR_GREEN);//4green
     // solid(COLOR_RED);//5red
     // solid(COLOR_CYAN);//6cyan
-     //solid(COLOR_WHITE);//7 White
+    //solid(COLOR_WHITE);//7 White
     //solid(COLOR_PURPLE);//8purp
     //solid(COLOR_PINK);//9 pionk
+   
     }
     default: break;  
   } 
 }
-
-

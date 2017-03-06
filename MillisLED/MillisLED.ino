@@ -42,9 +42,13 @@ uint8_t mode;//what would be passed in by
 unsigned long currentMillis = millis(); //time since start-up, lasts 50 days before overflow
 unsigned long previousMillis = 0;  // will store last time LEDs were updated
 
-
+////////////IMPORTANT SHIT
+//################################################################################
 // Set the first variable to the NUMBER of pixels. 25 = 25 pixels in a row
-Adafruit_WS2801 strip = Adafruit_WS2801(32, dataPin, clockPin);
+Adafruit_WS2801 strip = Adafruit_WS2801(64, dataPin, clockPin);
+//##############################################################################
+
+
 
 // Optional: leave off pin numbers to use hardware SPI
 // (pinout is then specific to each board and can't be changed)
@@ -52,17 +56,6 @@ Adafruit_WS2801 strip = Adafruit_WS2801(32, dataPin, clockPin);
 
 
 
-// Colors
-const uint32_t COLOR_BLACK = Color(0, 0, 0);//0black
-const uint32_t COLOR_ORANGE = Color(130, 60, 0);//1orange
-const uint32_t COLOR_BLUE = Color(0, 0, 129);//2blue
-const uint32_t COLOR_YELLOW = Color(129, 120, 0);//3yellow
-const uint32_t COLOR_GREEN = Color(0, 129, 0);//4green
-const uint32_t COLOR_RED = Color(127, 0, 0);//5red
-const uint32_t COLOR_CYAN = Color(0, 129, 64);//6cyan
-const uint32_t COLOR_WHITE = Color(100, 129, 129);//7 White
-const uint32_t COLOR_PURPLE = Color(67, 0, 129);//8purp
-const uint32_t COLOR_PINK = Color(129, 0, 67);//9 pionk
 
 //HELPER FUNCTIONS
 //#######################################################
@@ -97,10 +90,30 @@ uint32_t Color(byte r, byte g, byte b)
   c |= r;
   return c;
 }
+// Colors
+const uint32_t COLOR_BLACK = Color(0, 0, 0);//0black
+const uint32_t COLOR_ORANGE = Color(140, 55, 0);//1orange
+const uint32_t COLOR_BLUE = Color(0, 0, 129);//2blue
+const uint32_t COLOR_YELLOW = Color(129, 120, 0);//3yellow
+const uint32_t COLOR_GREEN = Color(0, 129, 0);//4green
+const uint32_t COLOR_RED = Color(127, 0, 0);//5red
+const uint32_t COLOR_CYAN = Color(0, 129, 64);//6cyan
+const uint32_t COLOR_WHITE = Color(100, 129, 129);//7 White
+const uint32_t COLOR_PURPLE = Color(67, 0, 129);//8purp
+const uint32_t COLOR_PINK = Color(129, 0, 67);//9 pionk
+
 
 void solid(uint32_t stripColor){
  byte i = 0;
   for (i=0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, stripColor);
+  }
+  strip.show();
+}
+
+void specialSolid (uint32_t stripColor){
+byte i = 0;
+  for (i=0; i < strip.numPixels()-5; i++) {
       strip.setPixelColor(i, stripColor);
   }
   strip.show();
@@ -117,21 +130,42 @@ void colorWipe(uint32_t c, uint8_t wait) {
 }
 
 
-void cycle(uint8_t spd, uint8_t pixLen){ // mode 1 DONE 
+void cycle(uint8_t spd, uint8_t pixLen, byte vision ){// mode 1 DONE 
   currentMode =  1;
-  bool doStuff = updater(spd, strip.numPixels());
+  bool doStuff = updater(spd, strip.numPixels()- 4);
   if(doStuff==true){
-    if (pixLen < 18){ 
+    if (pixLen < 19){ 
       strip.setPixelColor(iterator - pixLen, COLOR_BLUE);
       strip.setPixelColor(iterator , COLOR_ORANGE);//orange
-      strip.setPixelColor((strip.numPixels()- pixLen) + iterator, COLOR_BLUE);//clear out end
-      strip.show();
+      strip.setPixelColor((strip.numPixels()- pixLen-4) + iterator, COLOR_BLUE);//clear out end
       } 
     else {
-      solid(COLOR_ORANGE);
+      specialSolid(COLOR_WHITE);
     }  
-  iterator += 1 ;
+    iterator += 1 ;
   }
+  if(vision == 0){
+     strip.setPixelColor(strip.numPixels()- 5,COLOR_RED); 
+    strip.setPixelColor(strip.numPixels()- 4,COLOR_RED); 
+    strip.setPixelColor(strip.numPixels()- 3,COLOR_RED); 
+    strip.setPixelColor(strip.numPixels()- 2,COLOR_RED); 
+    strip.setPixelColor(strip.numPixels()- 1,COLOR_RED); 
+  } 
+  if(vision == 1){
+    strip.setPixelColor(strip.numPixels()- 5, COLOR_YELLOW);
+    strip.setPixelColor(strip.numPixels()- 4, COLOR_YELLOW);
+    strip.setPixelColor(strip.numPixels()- 3, COLOR_YELLOW);
+    strip.setPixelColor(strip.numPixels()- 2, COLOR_YELLOW);
+    strip.setPixelColor(strip.numPixels()- 1, COLOR_YELLOW);
+  }
+  if(vision == 2){
+    strip.setPixelColor(strip.numPixels()- 5, COLOR_GREEN);
+    strip.setPixelColor(strip.numPixels()- 4, COLOR_GREEN);
+    strip.setPixelColor(strip.numPixels()- 3, COLOR_GREEN);
+    strip.setPixelColor(strip.numPixels()- 2, COLOR_GREEN);
+    strip.setPixelColor(strip.numPixels()- 1, COLOR_GREEN);
+  }
+  strip.show();
 }
 
  void rainbow(uint8_t wait) { // mode 4 KYLE PLS CLEAN ME I AM SO OUT OF ORDER
@@ -370,41 +404,51 @@ void setup() {
   mode = 4;
 
 
-  solid(COLOR_BLUE);
+  solid(Color(0,0,129));
 
 }
 
 
 void loop() {
   byte flashColors;//used in mode 2
-  
+  byte visionTarget;
   byte pixelLength;//determines pixel lenth
   uint16_t passSpeed;//the delay value to be passed in 
   byte passMode;//determines what to use based on the passed in mode
- 
- mode = 238;
-  if (mode <= 99){
+ mode = 7;
+  if (mode <= 33){
     passMode = 1; //speed strip code
-    passSpeed = ((100 - mode)* 2);
+    passSpeed = ((33 - mode)* 6);
+    visionTarget = 0;
+  }
+  if ((33 < mode) && (mode <= 66)){
+    passMode = 1; //speed strip code
+    passSpeed = ((66 - mode)* 4);
+    visionTarget = 1; 
+  }
+  if ((66 < mode) && (mode < 100)){
+    passMode = 1; //speed strip code
+    passSpeed = ((99 - mode)* 4);
+    visionTarget = 2; 
   }
   if ((100 <= mode) && (mode < 200)){
     passMode = 2; //2 color flash
     flashColors = mode - 100;
   }  
-  if ((200 <= mode) && (mode < 220)){
-    passMode = 6; //orange and blue color wipe
-    passSpeed= 224 - mode;
+  if ((200 <= mode) && (mode < 240)){
+    passMode = 5; //meet
+    passSpeed= (245 - mode) * 2;
   }
-  if ((220 <= mode)&& (mode < 230)){
+  if ((240 <= mode)&& (mode < 245)){
     passMode = 3;//rainbow cycle
     passSpeed= 235 - mode;
   }
-  if ((230 <= mode)&&(mode < 240)){
+  if ((245 <= mode)&&(mode < 250)){
     passMode = 4;//rainbow
-    passSpeed= 244 - mode;
+    passSpeed= 254 - mode;
   }
-  if ((240 <= mode)&&(mode < 256)){
-    passMode = 5;//meet
+  if ((250 <= mode)&&(mode < 256)){
+    passMode = 6;//orange and blue color wipe
     passSpeed= (263 - mode) * 2;
   }
 
@@ -413,7 +457,7 @@ void loop() {
   switch(passMode){//switch structure for the LED mode
      
      case 1: {//do speed chaser mode
-      cycle(passSpeed, pixelLength);
+      cycle(passSpeed, pixelLength, visionTarget);
       break;
     }  
     
@@ -423,7 +467,7 @@ void loop() {
     }
     
     case 3: {//distributed rainbow
-      rainbowCycle(passSpeed);
+      rainbowCycle(15);
       break;
     }
     

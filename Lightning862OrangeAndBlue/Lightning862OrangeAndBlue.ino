@@ -36,7 +36,7 @@ uint8_t mode;//what would be passed in by
 // and the +5V wire to a +5V supply
 
 // Set the first variable to the NUMBER of pixels. 25 = 25 pixels in a row
-Adafruit_WS2801 strip = Adafruit_WS2801(32, dataPin, clockPin);
+Adafruit_WS2801 strip = Adafruit_WS2801(28, dataPin, clockPin);
 
 // Optional: leave off pin numbers to use hardware SPI
 // (pinout is then specific to each board and can't be changed)
@@ -328,9 +328,13 @@ void loop() {
   byte passMode;//determines what to use based on the passed in mode
 
  mode = 248;
-  if (mode <= 99){
+  if (mode <= 49){
     passMode = 1; //speed strip code
-    passSpeed = ((100 - mode)* 2);
+    passSpeed = ((50 - mode)* 4);
+  }
+  if ((49 < mode) && (mode < 100)){
+    passMode = 1; //speed strip code
+    passSpeed = ((100 - mode)* 4);
   }
   if ((100 <= mode) && (mode < 200)){
     passMode = 2; //2 color flash

@@ -1,4 +1,30 @@
 #include "Adafruit_WS2801.h" 
+#ifdef __AVR_ATtiny85__
+ #include <avr/power.h>
+#endif
+/*
+// fake class
+class cycleRibbonSize
+{
+  public:
+    int fakerSpeed;
+     uint8_t roboSpeed = 5;//temp
+  cycleRibbonSize(speedinput)
+  {
+ //robospeed = whatever the speed is returned as
+ unit8_t  = roboSpeed 
+
+  }
+  int figureOutSize(int f_speed);  
+};
+
+int cycleRibbonSize::figureOutSize(int f_speed)
+{
+  
+}
+*/
+
+
 
 
 const uint8_t dataPin  = 6;    // Yellow wire on Adafruit Pixels
@@ -138,9 +164,9 @@ void cycle(uint8_t spd, uint8_t pixLen, byte vision ){// mode 1 DONE
   strip.show();
 }
 
- void rainbow(uint8_t wait) { // mode 4 KYLE PLS CLEAN ME I AM SO OUT OF ORDER
+ void rainbow(uint8_t wait) {
   int i, j;
-   
+
   for (j=0; j < 256; j++) {     // 3 cycles of all 256 colors in the wheel
     for (i=0; i < strip.numPixels(); i++) {
       strip.setPixelColor(i, Wheel( (i + j) % 255));
@@ -153,18 +179,18 @@ void cycle(uint8_t spd, uint8_t pixLen, byte vision ){// mode 1 DONE
 // Slightly different, this one makes the rainbow wheel equally distributed 
 // along the chain
 void rainbowCycle(uint8_t wait) {// mode 3
-int i, j;
- 
+int j;
+ if (updater(wait, strip.numPixels())== true){ 
  for (j=0; j < 256 * 5; j++) {     // 5 cycles of all 25 colors in the wheel
     for (i=0; i < strip.numPixels(); i++) {
-      // tricky math! we use each pixel as a fraction of the full 96-color wheel
+      // we use each pixel as a fraction of the full 96-color wheel
       // (thats the i / strip.numPixels() part)
       // Then add in j which makes the colors go around per pixel
       // the % 96 is to make the wheel cycle around
-      strip.setPixelColor(i, Wheel( ((i * 256 / strip.numPixels()) + j) % 256) );
+      strip.setPixelColor(iterator, Wheel( ((iterator * 256 / strip.numPixels()) + j) % 256) );
     }  
     strip.show();   // write all the pixels out
-    delay(wait);
+    iterator += 1;
   }
 }
 
